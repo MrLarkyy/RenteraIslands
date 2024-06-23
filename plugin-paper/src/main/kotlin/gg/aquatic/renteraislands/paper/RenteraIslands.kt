@@ -4,13 +4,16 @@ import com.infernalsuite.aswm.api.SlimePlugin
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap
 import com.sk89q.worldedit.WorldEdit
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats
+import gg.aquatic.renteraislands.paper.network.NetworkingHandler
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.io.FileInputStream
+import java.util.ArrayList
 import java.util.UUID
 
 
@@ -28,6 +31,8 @@ class RenteraIslands: JavaPlugin() {
 
     override fun onEnable() {
         server.pluginManager.registerEvents(Listeners(),this)
+
+        NetworkingHandler.start()
     }
 
     override fun onDisable() {
@@ -39,8 +44,41 @@ class RenteraIslands: JavaPlugin() {
         @EventHandler
         fun PlayerJoinEvent.onJoin() {
             val loader = slimePlugin.getLoader("mysql")!!
-            val worldName = "test_${player.uniqueId}"
 
+            for (listWorld in loader.listWorlds()) {
+                if (listWorld.startsWith("stress")) {
+                    loader.deleteWorld(listWorld)
+                }
+            }
+
+            val names = ArrayList<String>()
+
+            for (i in 0..100) {
+                val name = "stress_$i"
+                names += name
+            }
+            
+            val originalWorld = slimePlugin.getWorld("template1")
+            for (name in names) {
+                object : BukkitRunnable() {
+                    override fun run() {
+                        val cloned = originalWorld.clone(name, loader)
+
+                        object:BukkitRunnable() {
+                            override fun run() {
+                                slimePlugin.loadWorld(cloned)
+                            }
+
+                        }.runTask(this@RenteraIslands)
+                    }
+                }.runTaskAsynchronously(this@RenteraIslands)
+
+            }
+
+
+
+            /*
+            val worldName = "test_${player.uniqueId}"
 
             var existed = false
 
@@ -56,7 +94,6 @@ class RenteraIslands: JavaPlugin() {
                 )
                 w
             }
-            slimePlugin.loadWorld(world)
 
             val bukkitWorld = Bukkit.getWorld(worldName)!!
 
@@ -68,6 +105,7 @@ class RenteraIslands: JavaPlugin() {
                 val clipboard = it.read()
                 SchematicUtil.placeSchematic(clipboard,bukkitWorld.spawnLocation)
             }
+             */
 
         }
     }

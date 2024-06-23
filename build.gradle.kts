@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 group = "gg.aquatic.renteraislands"
@@ -40,8 +41,6 @@ kotlin {
 subprojects {
     apply(plugin = "kotlin")
     apply(plugin = "com.github.johnrengelman.shadow")
-
-
 
     kotlin {
         jvmToolchain(21)

@@ -4,3 +4,4 @@ plugins {
 rootProject.name = "RenteraIslands"
 include("plugin-paper")
 include("plugin-proxy")
+include("api")
